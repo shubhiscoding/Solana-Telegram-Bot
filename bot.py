@@ -3,7 +3,7 @@ import requests
 from solana.rpc.api import Client
 
 # Define your tokens
-TELEGRAM_BOT_TOKEN = 'TELEGRAM_BOT_TOKEN
+TELEGRAM_BOT_TOKEN = '6887834486:AAFKTrtNt875erdO46dZAkJ-Dj8u76vSSdU'
 SOLANA_RPC_URL = 'https://api.mainnet-beta.solana.com'
 
 # Initialize Solana client
@@ -60,6 +60,7 @@ def get_solana_balance(wallet_address):
 def get_token_list(wallet, chat_id):
     url = f"https://api.solana.fm/v1/addresses/{wallet}/tokens"
     headers = {"accept": "application/json"}
+    print(f"Fetching token lists for wallet: {wallet}")
     response = requests.get(url, headers=headers)
     if response.status_code == 200:
         data = response.json()
@@ -89,6 +90,49 @@ def get_token_list(wallet, chat_id):
         send_message(chat_id, f"Your Solana balance is:\n {token_info}")
     else:
         send_message(chat_id, f"Failed to retrieve tokens. Status code: {response.status_code}")
+
+
+def get_recent_transactions(wallet_address):
+    try:
+        print(f"Fetching recent transactions for wallet: {wallet_address}")
+        url = f"https://api.solana.fm/v0/accounts/{wallet_address}/transfers?page=1"
+        response = requests.get(url)
+        if response.status_code == 200:
+            data = response.json()
+            results = data.get('results', [])
+            transactions_info = "------Your most recent transactions------\n\n"
+            i=0;
+            for result in results:
+                transaction_hash = result.get('transactionHash')
+                data = result.get('data', [])
+                for item in data:
+                    if item.get('action') == 'transfer':
+                        sender = item.get('source')
+                        receiver = item.get('destination')
+                        amount = item.get('amount')
+                        amount_sol = "more"
+                        transaction_link = f"[{transaction_hash}]"
+                        transactions = (
+                            f"Transaction Hash: {transaction_link}\n"
+                            f" \n"
+                            f"Sender: {sender}\n"
+                            f" \n"
+                            f"Receiver: {receiver}\n"
+                            f" \n"
+                            f"Read more: (https://solscan.io/tx/{transaction_hash})\n\n"
+                        )
+                        transactions_info += transactions
+                i+=1
+                if i == 2:
+                    break
+            return transactions_info  # Return only the 10 most recent transactions
+        else:
+            print(f"Failed to fetch recent transactions. Status code: {response.status_code}")
+            return []
+    except Exception as e:
+        print(f"An error occurred while fetching recent transactions: {str(e)}")
+        return []
+
 
 
 # Process updates
@@ -133,8 +177,26 @@ def process_updates(updates):
                 "Here are the available commands:\n"
                 "/balance <wallet_address> - Get the Solana balance of a wallet\n"
                 "/tokens <wallet_address> - Get the Solana tokens of a wallet\n"
+                "/transactions <wallet_address> - Get the recent transactions of a wallet\n"
+
             )
             send_message(chat_id, help_text)
+        
+        if text.startswith('/transactions'):
+            try:
+                # Extract the wallet address from the command
+                wallet_address = text.split('/transactions ')[1].strip()
+                # Retrieve the recent transactions
+                transactions = get_recent_transactions(wallet_address)
+                # Send the transactions as a reply
+                if transactions !=" ":   
+                    send_message(chat_id, transactions)
+                else:
+                    send_message(chat_id, "No recent transactions found.")
+            except IndexError:
+                send_message(chat_id, "Please provide a valid Solana wallet address.")
+            except Exception as e:
+                send_message(chat_id, f"An error occurred: {str(e)}")
 
 # Main function to continuously fetch and process updates
 def main():
@@ -148,4 +210,3 @@ def main():
 
 if __name__ == '__main__':
     main()
-
