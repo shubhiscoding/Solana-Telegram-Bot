@@ -3,7 +3,7 @@ import requests
 from solana.rpc.api import Client
 
 # Define your tokens
-TELEGRAM_BOT_TOKEN = '6887834486:AAFKTrtNt875erdO46dZAkJ-Dj8u76vSSdU'
+TELEGRAM_BOT_TOKEN = 'TELEGRAM_BOT_TOKEN
 SOLANA_RPC_URL = 'https://api.mainnet-beta.solana.com'
 
 # Initialize Solana client
