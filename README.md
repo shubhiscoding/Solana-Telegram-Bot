@@ -1,5 +1,12 @@
 # Solana Explorer Telegram Bot
 
+## Demo Video
+
+
+https://github.com/shubhiscoding/Solana-Telegram-Bot/assets/95687419/f4e7c4aa-02c1-48d0-80fc-9bf15643466e
+
+
+
 ## Introduction
 
 Solana Explorer is a Telegram bot designed to simplify Solana blockchain exploration by providing easy access to essential functionalities such as retrieving balances, token lists, and recent transactions. This documentation provides instructions on how to run the bot locally and use its features.
